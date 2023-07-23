@@ -1,10 +1,10 @@
 import './home.css'
-import Navbar from '../Navbar/Navbar'
+import Menubar from '../Navbar/Navbar'
 
 function Home() {
   return (
     <div>
-     <Navbar/>
+     <Menubar heading={'Home page'}/>
      <h1>dsfdsfs</h1>
     </div>
   )
