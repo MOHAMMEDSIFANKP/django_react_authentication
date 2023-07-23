@@ -16,7 +16,7 @@ function App(){
         <Route Component={Register} path='/register' />
         <Route Component={Admin} path='/admin' />
         <Route Component={Adduser} path='/adduser' />
-        <Route Component={Edituser} path='/edituser' />
+        <Route Component={Edituser} path='/edituser/:index' />
       </Routes>
     </div>
   );

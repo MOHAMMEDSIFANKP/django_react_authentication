@@ -1,6 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 from .models import User
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.contrib.auth.hashers import make_password
 
 class UserSerializer(ModelSerializer):
     class Meta:
@@ -20,8 +21,9 @@ class UserSerializer(ModelSerializer):
 
     def update(self, instance, validated_data):
         password = validated_data.get('password')
-        if password is None:
-            validated_data.pop('password')
+        if password:
+            hashed_password = make_password(password)
+            validated_data['password'] = hashed_password
         return super().update(instance, validated_data)
     
     

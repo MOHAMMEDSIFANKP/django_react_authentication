@@ -8,8 +8,9 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import './admin.css'
 
-function Edituser(index){
-    alert(index)
+function Edituser(props){
+    const { index } = props.match.params;
+    alert(index,'edituser')
     const history = useNavigate();
     const AddUserRegister = async(e)=>{
         e.preventDefault()
@@ -34,21 +35,21 @@ function Edituser(index){
             alert("Password atleast have 6 characters")
             return
         }
-        // const response = await axios.pu(`${baseUrl}user-register/`,{
-        //     method: 'POST',
-        //     headers: {'Content-Type': 'application/json'},
-        //     body: JSON.stringify({
-        //       'username': data[0],
-        //       'email':data[1],
-        //       'password':data[2],
-        //     })
-        //   });
-        // if (response.status === 400){
-        // alert(response.status)
-        // history('/adduser')
-        // }else{
-        // history('/admin')
-        // }
+        const response = await fetch(`${baseUrl}user-register/`,{
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              'username': data[0],
+              'email':data[1],
+              'password':data[2],
+            })
+          });
+        if (response.status === 400){
+        alert(response.status)
+        history('/adduser')
+        }else{
+        history('/admin')
+        }
           
     }
     
