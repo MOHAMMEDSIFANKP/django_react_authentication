@@ -2,9 +2,14 @@ import React,{useState,useEffect} from 'react';
 import Menubar from '../Navbar/Navbar';
 import {getLocal} from '../../healpers/auth'
 import {useNavigate } from 'react-router-dom';
-import { MDBBadge, MDBTable, MDBTableHead, MDBTableBody } from 'mdb-react-ui-kit';
 import axios from 'axios';
 import { baseUrl } from '../../api/api';
+import jwt_decode from 'jwt-decode'
+
+// Css and boostrap
+import { MDBBadge, MDBTable, MDBTableHead, MDBTableBody } from 'mdb-react-ui-kit';
+import Form from 'react-bootstrap/Form';
+import Button from 'react-bootstrap/Button';
 
 function Admin() {
     const token = getLocal()
@@ -16,19 +21,146 @@ function Admin() {
         setUsers(request.data)
     }
     useEffect(()=>{
-        if (!token){
+        const decoded = jwt_decode(token)
+        if (!decoded){
+            history('/')
+        }else if (!decoded.is_admin){
             history('/')
         }
         getUserlist()
     },[history, token]);
-    const edituser = (index)=>{
-        alert(index)
-        history(`/edituser/${index}`);
+// Add User
+const AddUserRegister = async(e)=>{
+    e.preventDefault()
+
+    const data = [e.target.username.value,
+                  e.target.email.value,
+                  e.target.password.value,
+                  e.target.password1.value
+                ]
+    for (let i=0;i<=data.length;i++){
+        if (data[i]===''){
+        alert("feild cannot be blank")
+        return
+    }}
+    if (data[2]!==data[3]){
+        alert("Password doesn't match")
+        return
     }
+    const response = await fetch(`${baseUrl}user-register/`,{
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          'username': data[0],
+          'email':data[1],
+          'password':data[2],
+        })
+    });
+    if (response.status === 400){
+        alert(response.status)
+        history('/admin')
+        }else{
+            getUserlist();
+            history('/admin');
+        }
+    }
+// Edit User
+    const EditFrom = async (index, e) => {
+        const result = users.find((user, i) => i === index);
+        e.preventDefault();
+        const data = [
+          e.target.username.value,
+          e.target.email.value,
+          e.target.password.value,
+        ];
+        if (data[0] ===''){
+            data[0]=result.username
+        }
+        if (data[1] ===''){
+            data[1]=result.email
+        }
+        if (data[2] ===''){
+            alert("Please entr Old Password or New password")
+            return
+        }
+        const id = result.id
+        const response = await fetch(`${baseUrl}user-detail/${id}/`,{
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              'username': data[0],
+              'email':data[1],
+              'password':data[2],
+            })
+          });
+          if (response.status === 400){
+            alert(response.status)
+            history('/admin')
+            }else{
+            getUserlist();
+            history('/admin')
+            }
+      };
+// Delete User
+      const deleteUser = async (index, e) =>{
+        const response = await fetch(`${baseUrl}user-detail/${index}/`,{
+            method: 'DELETE',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+            })
+          });
+          if (response.status === 400){
+            alert(response.status)
+            history('/admin')
+            }else{
+            getUserlist()
+            history('/admin')
+            }
+      }
+
     return (
         <div>
-            <Menubar heading={'Admin page'}/>
-            <button className='btn btn-warning ms-3 my-3' onClick={()=>history('/adduser')}>Add User</button>
+            <Menubar heading={'Admin page'}/>       
+            <button type="button" class="btn btn-warning ms-3 my-3" data-toggle="modal" data-target="#exampleModal">
+            add User
+            </button>
+            <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Add User</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                <div style={{ display: 'block', width: 500,padding: 20 }}>
+                <Form onSubmit={(e)=>AddUserRegister(e)} >
+                <Form.Group className="py-2">
+                <Form.Control type="text" name="username" placeholder="Username" />
+                </Form.Group>
+                <Form.Group className="py-2">
+                <Form.Control type="email" name="email" placeholder="Email" />
+                </Form.Group>
+                <Form.Group className="py-2">
+                <Form.Control type="password" name="password" placeholder="Password" />
+                </Form.Group>
+                <Form.Group className="py-2">
+                <Form.Control type="password" name="password1" placeholder="Confirm Password" />
+                </Form.Group>
+                <Form.Group></Form.Group>
+                <Button variant="primary" className="my-4" type="submit">
+                submit
+                </Button>
+                </Form>
+                </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+                </div>
+            </div>
+            </div>
             <div class="card cards recent-sales overflow-auto mx-3">
                 <MDBTable align='middle'>
                 <MDBTableHead>
@@ -61,27 +193,37 @@ function Admin() {
                             </MDBBadge>:<MDBBadge color='success' pill>Active</MDBBadge>}  
                         </td>
                         <td>
-                        <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#exampleModal"><i class="fas fa-edit"></i></button>
-                        <div className="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <button type="button" className="btn btn-primary" data-toggle="modal" data-target={`#exampleModal${index}`}><i class="fas fa-edit"></i></button>
+                        <div className="modal fade" id={`exampleModal${index}`} tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                         <div className="modal-dialog" role="document">
                             <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title" id="exampleModalLabel">Modal title</h5>
+                                <h5 className="modal-title" id="exampleModalLabel">Edit User</h5>
                                 <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
                             <div className="modal-body">
-                                ...
+                            <Form onSubmit={(e) => EditFrom(index, e)}>
+                            <Form.Group className="py-2">
+                            <Form.Control  type="text"  name="username" placeholder="Username" />
+                            </Form.Group>
+                            <Form.Group className="py-2">
+                            <Form.Control type="email" name="email" placeholder="Email" />
+                            </Form.Group>
+                            <Form.Group className="py-2">
+                            <Form.Control type="password" name="password" placeholder="Password"/>
+                            </Form.Group>
+                            <button type="submit" className="btn btn-primary">Save changes</button>
+                            </Form>
                             </div>
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
-                                <button type="button" className="btn btn-primary">Save changes</button>
                             </div>
                             </div>
                         </div>
                         </div>
-                        <button className='btn btn-danger ms-1'>Delete</button>
+                        <button onClick={(e)=>deleteUser(user.id, e)} className='btn btn-danger ms-1'>Delete</button>
                         </td>
                         </tr>
                     )
