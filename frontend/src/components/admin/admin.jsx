@@ -114,19 +114,31 @@ const AddUserRegister = async(e)=>{
             history('/admin')
             }else{
             getUserlist()
+
             history('/admin')
             }
       }
+// Search User
+    const searchUser =  async (keyword) =>{
+        if (!keyword == ''){
+        const request = await axios.get(`${baseUrl}user-list/?search=${keyword}`)
+        setUsers(request.data)
+    }else{
+        getUserlist()
+    }
+    } 
 
     return (
         <div>
-            <Menubar heading={'Admin page'}/>       
-            <button type="button" class="btn btn-warning ms-3 my-3" data-toggle="modal" data-target="#exampleModal">
-            add User
-            </button>
+            <Menubar heading={'Admin page'}/>  
+            <div class="d-flex justify-content-end container-fluid">
+            <button type="button" class="btn btn-warning me-3 my-3" data-toggle="modal" data-target="#exampleModal">Add User</button>
+            <input type="text" class="form-control w-25 my-2 ms-auto" onChange={(e)=>searchUser(e.target.value)} placeholder="Search here" />
+            </div>
             <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
+                <Form onSubmit={(e)=>AddUserRegister(e)} >
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel">Add User</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -134,8 +146,8 @@ const AddUserRegister = async(e)=>{
                     </button>
                 </div>
                 <div class="modal-body">
-                <div style={{ display: 'block', width: 500,padding: 20 }}>
-                <Form onSubmit={(e)=>AddUserRegister(e)} >
+                <div style={{ display: 'block', width: 470,padding: 20 }}>
+                
                 <Form.Group className="py-2">
                 <Form.Control type="text" name="username" placeholder="Username" />
                 </Form.Group>
@@ -149,15 +161,13 @@ const AddUserRegister = async(e)=>{
                 <Form.Control type="password" name="password1" placeholder="Confirm Password" />
                 </Form.Group>
                 <Form.Group></Form.Group>
-                <Button variant="primary" className="my-4" type="submit">
-                submit
-                </Button>
-                </Form>
                 </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <Button variant="primary" className="my-4" type="submit">Add User</Button>
                 </div>
+                </Form>
                 </div>
             </div>
             </div>
@@ -197,6 +207,7 @@ const AddUserRegister = async(e)=>{
                         <div className="modal fade" id={`exampleModal${index}`} tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                         <div className="modal-dialog" role="document">
                             <div className="modal-content">
+                            <Form onSubmit={(e) => EditFrom(index, e)}>
                             <div className="modal-header">
                                 <h5 className="modal-title" id="exampleModalLabel">Edit User</h5>
                                 <button type="button" className="close" data-dismiss="modal" aria-label="Close">
@@ -204,22 +215,23 @@ const AddUserRegister = async(e)=>{
                                 </button>
                             </div>
                             <div className="modal-body">
-                            <Form onSubmit={(e) => EditFrom(index, e)}>
+                           
                             <Form.Group className="py-2">
-                            <Form.Control  type="text"  name="username" placeholder="Username" />
+                            <Form.Control  type="text"  name="username" placeholder="Username" defaultValue={user.username} />
                             </Form.Group>
                             <Form.Group className="py-2">
-                            <Form.Control type="email" name="email" placeholder="Email" />
+                            <Form.Control type="email" name="email" placeholder="Email" defaultValue={user.email}/>
                             </Form.Group>
                             <Form.Group className="py-2">
                             <Form.Control type="password" name="password" placeholder="Password"/>
                             </Form.Group>
-                            <button type="submit" className="btn btn-primary">Save changes</button>
-                            </Form>
+                           
                             </div>
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" className="btn btn-primary">Update</button>
                             </div>
+                            </Form>
                             </div>
                         </div>
                         </div>
